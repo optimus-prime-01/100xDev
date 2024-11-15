@@ -1,0 +1,65 @@
+<!-- <html>
+    <script>
+        function populatediv(){
+            const a=document.getElementById("firstnumber").value;
+            const b=document.getElementById("secondnumber").value;
+            const ele=document.getElementById("finalsum");
+            ele.innerHTML=parseInt(a)+parseInt(b);
+        }
+    </script>
+    <body>
+        <input id="firstnumber" type="text" placeholder="first number"></input>
+        <br></br>
+        <input id="secondnumber" type="text" placeholder="second number"></input>
+        <br></br>
+        <button onclick="populatediv()">calculate sum</button><br></br>
+        <div id="finalsum"></div> 
+    </body>
+</html> -->
+
+
+
+ <!-- now we will get the sum of two numbers with the help of backend -->
+
+ <html>
+    <script>
+        let timeout;
+        function debouncepopulatediv(){
+            clearTimeout(timeout);
+            timeout=setTimeout(function(){
+                populatediv();
+            },1000);
+        }
+        function populatediv() {
+            const a = document.getElementById("firstnumber").value;
+            const b = document.getElementById("secondnumber").value;
+            const c=document.getElementById("finalsum");
+            
+           const res= fetch(`http://localhost:3000/?a=${a}&b=${b}`).then(function(res){
+            res.text() //here res is promise,so we are using .then function
+                .then(function(ans){
+                 c.innerHTML=ans;
+            })
+           })      
+        // OR cleaner async await function for above is:-
+        // async function populatediv2(){
+        //     const a = document.getElementById("firstnumber").value;
+        //     const b = document.getElementById("secondnumber").value;
+        //     const res=await fetch(`http://localhost:3000/?a=${a}&b=${b}`);
+        //     const ans=await res.text();
+        //     document.getElementById("finalsum").innerHTML=ans;
+        // }
+    </script>
+    <body>
+        <input id="firstnumber" type="text" placeholder="first number"></input>
+        <br></br>
+        <input id="secondnumber" type="text" placeholder="second number"></input>
+        <br></br>
+        <button onclick="populatediv()">Calculate Sum</button>
+        <br></br>
+        <div id="finalsum"></div> 
+    </body>
+</html>
+
+
+
