@@ -22,7 +22,7 @@ const App = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
 
-  const API_KEY = 'AIzaSyBHBOkdGfoZFFfdP-YwYsN3JYnbYo-CH4Q';
+  const API_KEY = 'API-KEY';
   const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
 
   const fetchResponse = async () => {
