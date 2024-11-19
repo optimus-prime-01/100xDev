@@ -1,0 +1,153 @@
+import React from 'react';
+
+const ResponseItem = ({ description }) => {
+  return (
+    <div style={{
+      padding: '1rem',
+      border: '1px solid #ddd',
+      borderRadius: '0.5rem',
+      marginBottom: '1rem',
+      whiteSpace: 'pre-wrap'  // This preserves formatting
+    }}>
+      <div style={{ margin: 0, fontSize: '1.1rem' }}>
+        {description}
+      </div>
+    </div>
+  );
+};
+
+const App = () => {
+  const [responses, setResponses] = React.useState([]);
+  const [prompt, setPrompt] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+
+  const API_KEY = 'AIzaSyBHBOkdGfoZFFfdP-YwYsN3JYnbYo-CH4Q';
+  const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
+
+  const fetchResponse = async () => {
+    if (!prompt.trim()) {
+      setError('Please enter a prompt');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt + "\n\nPlease provide a detailed step-by-step response."
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to fetch response');
+      }
+
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates[0]?.content?.parts) {
+        const responseText = data.candidates[0].content.parts[0].text;
+        setResponses([{
+          id: Date.now(),
+          description: responseText
+        }]);
+        //setPrompt(''); // Clear the input after successful response
+      } else {
+        throw new Error('Unexpected API response format');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('API Error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      fetchResponse();
+    }
+  };
+
+  return (
+    <div style={{ 
+      maxWidth: '800px', 
+      margin: '0 auto', 
+      padding: '1rem' 
+    }}>
+      <h1 style={{ 
+        fontSize: '1.5rem', 
+        fontWeight: 'bold',
+        marginBottom: '1rem' 
+      }}>
+        AI Assistant
+      </h1>
+      
+      <div style={{
+        marginBottom: '1rem'
+      }}>
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Enter your prompt here..."
+          style={{
+            width: '100%',
+            padding: '0.5rem',
+            borderRadius: '0.25rem',
+            border: '1px solid #ddd',
+            minHeight: '100px',
+            marginBottom: '0.5rem',
+            fontFamily: 'inherit'
+          }}
+        />
+        <button 
+          onClick={fetchResponse}
+          disabled={isLoading}
+          style={{
+            padding: '0.5rem 1rem',
+            backgroundColor: isLoading ? '#ccc' : '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.25rem',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {isLoading ? 'Generating Response...' : 'Get Response'}
+        </button>
+      </div>
+
+      {error && (
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#fee2e2',
+          border: '1px solid #ef4444',
+          borderRadius: '0.25rem',
+          marginBottom: '1rem'
+        }}>
+          <p style={{ color: '#dc2626', margin: 0 }}>Error: {error}</p>
+        </div>
+      )}
+
+      <div>
+        {responses.map((response) => (
+          <ResponseItem key={response.id} description={response.description} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default App;
